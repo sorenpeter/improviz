@@ -1,24 +1,36 @@
 module Language
-  ( initialInterpreterState
-  , parse
-  , interpret
+  ( parse
+  , compile
+  , initialInterpreterState
   , setInterpreterVariables
+  , interpret
+  , initialImpVMState
   , module Language.Ast
   )
 where
 
 import qualified Data.Map.Strict               as M
+import qualified Data.Set                      as S
+import qualified Data.Vector                   as V
+
 import           Control.Monad                  ( forM_ )
 import           Control.Monad.Trans            ( liftIO )
 import           Lens.Simple                    ( set )
 
 import           Gfx.Context                    ( GfxContext )
 
+import           Language.Parser                ( parseProgram )
+import           Language.Parser.Errors         ( ParserError )
+import qualified Language.Compiler             as LC
+import           Language.Ast.Transformers      ( transform )
 import           Language.Ast                   ( Identifier
-                                                , Program
+                                                , Program(..)
                                                 , Value(..)
                                                 )
-import           Language.Ast.Transformers      ( transform )
+import           Language.ImpVM                 ( cleanVM )
+import           Language.ImpVM.Types           ( VMState
+                                                , Instruction
+                                                )
 import           Language.Interpreter           ( emptyState
                                                 , getGlobalNames
                                                 , interpretLanguage
@@ -30,13 +42,17 @@ import           Language.Interpreter.Types     ( InterpreterState
                                                 , externals
                                                 )
 import           Language.Interpreter.StdLib    ( addStdLib )
-import           Language.Parser                ( parseProgram )
-import           Language.Parser.Errors         ( ParserError )
 import           Logging                        ( logInfo )
 
 
 parse :: String -> Either ParserError Program
 parse = parseProgram
+
+compile
+  :: S.Set String -> Program -> Program -> Either String (V.Vector Instruction)
+compile globals (Program defaultStmts) (Program progStmts) =
+  let stmts = defaultStmts ++ progStmts
+  in  LC.compile $ transform globals (Program stmts)
 
 initialInterpreterState
   :: [(FilePath, Program)] -> GfxContext -> IO InterpreterState
@@ -70,3 +86,6 @@ interpret initialState program =
         globals <- getGlobalNames
         interpretLanguage (transform globals program)
   in  runInterpreterM run initialState
+
+initialImpVMState :: GfxContext -> VMState GfxContext
+initialImpVMState ctx = cleanVM ctx M.empty

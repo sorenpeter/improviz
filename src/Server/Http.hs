@@ -14,6 +14,7 @@ import           Control.Concurrent             ( ThreadId
 import           Control.Concurrent.STM         ( TVar
                                                 , atomically
                                                 , modifyTVar
+                                                , readTVarIO
                                                 )
 import           Control.Monad.Trans            ( liftIO )
 import           System.FilePath.Posix          ( (</>) )
@@ -27,10 +28,13 @@ import           Logging                        ( logError
                                                 )
 
 import qualified Language                      as L
-import           Language.Ast                   ( Value(Number) )
+import           Language.Ast                   ( Program
+                                                , Value(Number)
+                                                )
 import           Language.Parser.Errors         ( prettyPrintErrors
                                                 , parseErrorsOut
                                                 )
+import           Language.ImpVM.Types           ( builtins )
 
 import           Server.Protocol
 
@@ -43,6 +47,7 @@ import qualified Improviz.UI                   as IUI
 
 import           Lens.Simple                    ( set
                                                 , (^.)
+                                                , view
                                                 )
 
 editorHtmlFilePath :: FilePath
@@ -51,15 +56,30 @@ editorHtmlFilePath = "html/editor.html"
 updateProgram :: ImprovizEnv -> String -> IO ImprovizResponse
 updateProgram env newProgram = case L.parse newProgram of
   Right newAst -> do
-    atomically $ do
-      modifyTVar (env ^. I.language) (IL.updateProgram newProgram newAst)
-      modifyTVar (env ^. I.ui)       (set IUI.currentText newProgram)
-    let msg = "Parsed Successfully"
-    logInfo msg
-    return $ ImprovizOKResponse msg
+    msg <- updateEnv env newProgram newAst
+    case msg of
+      Right m -> do
+        logInfo m
+        return $ ImprovizOKResponse m
+      Left m -> do
+        logError m
+        return $ ImprovizErrorResponse m
   Left err -> do
     logError $ prettyPrintErrors err
     return $ ImprovizCodeErrorResponse $ parseErrorsOut err
+
+updateEnv :: ImprovizEnv -> String -> Program -> IO (Either String String)
+updateEnv env newProgram newAst = do
+  il <- readTVarIO $ env ^. I.language
+  let globals     = M.keysSet $ view (IL.impVMState . builtins) il
+  let defaultCode = view IL.userCode il
+  case L.compile globals defaultCode newAst of
+    Left  err -> return $ Left err
+    Right bc  -> do
+      atomically $ do
+        modifyTVar (env ^. I.language) (IL.updateProgram newProgram newAst bc)
+        modifyTVar (env ^. I.ui)       (set IUI.currentText newProgram)
+      return $ Right "Updated Successfully"
 
 toggleTextDisplay :: TVar ImprovizUI -> IO ImprovizResponse
 toggleTextDisplay ui = do
