@@ -1,4 +1,4 @@
-name: texture
+name: wobbler
 vertexShader: |
   #version 330 core
 
@@ -20,14 +20,18 @@ fragmentShader: |
   in vec2 Texcoord;
 
   uniform sampler2D Texture;
-  uniform float TextureAlpha;
+  uniform float Time;
+  uniform float Freq;
+  uniform float Depth;
 
-  vec4 textureColours;
-  float alpha;
   out vec4 finalColour;
 
+  vec2 wobble(vec2 st, float freq) {
+    float x = sin((st.x + Time) * freq) * 0.5 + 0.5;
+    float y = sin((st.y + Time) * freq) * 0.5 + 0.5;
+    return vec2(x*Depth, y*Depth);
+  }
+
   void main() {
-      textureColours = texture(Texture, Texcoord);
-      alpha = textureColours.a;
-      finalColour = vec4(textureColours.rgb, alpha * TextureAlpha);
+      finalColour = texture(Texture, Texcoord + wobble(Texcoord, Freq));
   }

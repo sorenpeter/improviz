@@ -11,3 +11,12 @@ materials:
     file: ceed.yaml
   - name: barycentric
     file: barycentric.yaml
+  - name: wobbler
+    file: wobbler.yaml
+  - name: fade
+    file: fade.yaml
+defaults:
+  - name: StrokeSize
+    value: 0.08
+  - name: TextureAlpha
+    value: 1.0

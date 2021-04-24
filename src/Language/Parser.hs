@@ -62,12 +62,12 @@ rword :: String -> Parser ()
 rword w = (lexeme . try) (string w *> notFollowedBy alphaNumChar)
 
 rws :: [String]
-rws = ["if", "elif", "else", "null", "func", "times", "with", "time"]
+rws = ["if", "elif", "else", "null", "func", "loop", "times", "with", "time"]
 
 identifier :: Parser String
 identifier = (lexeme . try) (p >>= check)
  where
-  p = (:) <$> letterChar <*> many alphaNumChar
+  p = (:) <$> (letterChar <|> char '$' <|> char '_') <*> many (alphaNumChar <|> char '$' <|> char '_')
   check x = if x `elem` rws
     then fail $ "keyword " ++ show x ++ " cannot be an identifier"
     else return x
@@ -236,7 +236,7 @@ loop = L.indentBlock scn l
  where
   l = do
     ilevel   <- L.indentLevel
-    loopExpr <- try (optional (symbol "loop") *> expression <* symbol "times")
+    loopExpr <- try (symbol "loop") *> expression <* symbol "times"
     loopVar  <- optional (rword "with" *> identifier)
     return
       (L.IndentSome (Just (ilevel <> tabWidth))

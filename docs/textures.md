@@ -7,10 +7,10 @@ texture(:another)
   cube()
 move()
 fill(255, 0, 0)
-  ball()
+  sphere()
 ```
 
-The program loads the textures at start-up from the specified directories. By default this is the *./textures* folder in the directory the program is run from. This can be changed, or more directories added, but changing the *config.yaml* file settings.
+The program loads the textures at start-up from the specified directories. By default this is the *./textures* folder in the directory the program is run from. This can be changed, or more directories added, by changing the *config.yaml* file settings.
 
 There needs to be a *config.yaml* file within any folder that textures will be loaded from. To add more textures, just drop the image files into the directory and then add update the file.
 
@@ -49,7 +49,7 @@ background(0, 255, 100)
 noStroke()
 move(3, -3, -10)
 texture(:code)
-100 times with i
+loop 100 times with i
 	x = cos(time + (i / 10)) * 0.05
 	y = sin(time + (i / 10)) * 0.07
 	move(x, y, 0.1)

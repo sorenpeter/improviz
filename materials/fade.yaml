@@ -1,4 +1,4 @@
-name: texture
+name: fade
 vertexShader: |
   #version 330 core
 
@@ -20,14 +20,17 @@ fragmentShader: |
   in vec2 Texcoord;
 
   uniform sampler2D Texture;
-  uniform float TextureAlpha;
+  uniform float Threshold;
 
-  vec4 textureColours;
-  float alpha;
   out vec4 finalColour;
 
+
   void main() {
-      textureColours = texture(Texture, Texcoord);
-      alpha = textureColours.a;
-      finalColour = vec4(textureColours.rgb, alpha * TextureAlpha);
+      vec4 tc = texture(Texture, Texcoord);
+      float brightness  =  sqrt( 0.241 * tc.r + 0.691 * tc.g + 0.068 * tc.b );
+      if (brightness > Threshold) {
+        discard;
+      } else {
+        finalColour = tc;
+      }
   }

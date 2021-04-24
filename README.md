@@ -3,12 +3,26 @@
 [![Build Status](https://travis-ci.org/rumblesan/improviz.svg?branch=main)](https://travis-ci.org/rumblesan/improviz)
 [![Windows build](https://ci.appveyor.com/api/projects/status/sv8a7mosacfsng2l?svg=true)](https://ci.appveyor.com/project/rumblesan/improviz)
 
-An offshoot of [LiveCodeLab](https://livecodelab.net)
-
 
 ## Description
 
-Improviz is built in Haskell and interacts directly with OpenGL. It's very much a work in progress but it should be about usable.
+Improviz is a live-coding environment built for creating visual performances of abstract shapes, blurred shades and broken GIFs.
+
+It is built in Haskell and interacts directly with OpenGL. It's very much a work in progress but is definitely stable enough to use for performances.
+
+
+## Documentation
+
+The most up-to-date documentation can be found in [the docs folder](docs/index.md) which are also used to build the [Improviz site](https://improviz.rumblesan.com), but the README should give enough of an overview to get started.
+
+
+## Browser Version
+
+There is now a browser based version of Improviz available at [https://improviz-web.rumblesan.com/](https://improviz-web.rumblesan.com/) which has much of the functionality of the native version.
+
+The primary differences are that it currently lacks the ability to load custom textures, geometries and materials, though hopefully that will be changed in future.
+
+More details can be found [in the docs](docs/web.md) whilst the code can be found in a [different repository](https://github.com/rumblesan/improviz-web).
 
 
 ## Installing
@@ -38,6 +52,15 @@ Depending on your platform it may be necessary to install some or all of the fol
 * freeglut3-dev
 * zlib1g-dev
 
+From there, you'll be able to run what was just built using
+
+```bash
+stack exec improviz
+```
+
+which will use the *improviz.yaml* file in the root of the repository.
+
+For more information about building and installing Improviz, check the [development documentation](docs/development.md).
 
 ## Running
 
@@ -63,7 +86,7 @@ Open your browser and go to [http://localhost:3000/editor](http://localhost:3000
 background(255, 0, 0)
 
 fill(0, 255, 255)
-10 times
+loop 10 times
 	rotate(time, 3, time)
 	cube(4)
 ```
@@ -89,6 +112,15 @@ As part of the project, artist, algoraver, and all-round excellent human being [
 These excellent and unique images are bundled in the pre-built binary releases and can be found in the **hellocatfood/gifs** folder in this repo. The **hellocatfood/geometries** folder contains the *.obj* files used to make some of them which can also be loaded by Improviz. They're all licensed under the [Creative Commons Attribution 4.0 International licence](https://creativecommons.org/licenses/by/4.0/) so can be freely used and misused for performances, projects, and anything else you want.
 
 By default they're not loaded by improviz when using the default configuration as they're quite large and slow startup a bit, but just uncomment the relevant lines in the **improviz.yaml** config file and you're ready to go.
+
+## Contributors
+
+Many thanks to the following people who have contributed to Improviz and it's development.
+
+[hellocatfood](https://hellocatfood.com) for the excellent gifs and general feedback
+[darch](http://www.darch.dk/) for some really helpful feedback, and teaching improviz workshops
+[nihilazo](https://itwont.work/git/) for helping polish the vim plugin and give it some necessary updates
+
 
 ## Contact
 
